@@ -1,0 +1,22 @@
+\babel@toc {ngerman}{}\relax 
+\contentsline {section}{\numberline {1}Lösungsidee}{1}{section.1}%
+\contentsline {section}{\numberline {2}Umsetzung}{2}{section.2}%
+\contentsline {section}{\numberline {3}Werkzeuge}{2}{section.3}%
+\contentsline {section}{\numberline {4}Beispiele}{2}{section.4}%
+\contentsline {subsection}{\numberline {4.1}drehfreudig01.txt}{2}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}drehfreudig02.txt}{2}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}drehfreudig03.txt}{2}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}drehfreudig04.txt}{2}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}drehfreudig05.txt}{2}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}drehfreudig06.txt}{2}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}drehfreudig07.txt}{2}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}drehfreudig08.txt}{3}{subsection.4.8}%
+\contentsline {subsection}{\numberline {4.9}drehfreudig09.txt}{3}{subsection.4.9}%
+\contentsline {subsection}{\numberline {4.10}drehfreudig10.txt}{3}{subsection.4.10}%
+\contentsline {subsection}{\numberline {4.11}drehfreudig11.txt}{3}{subsection.4.11}%
+\contentsline {subsection}{\numberline {4.12}drehfreudig12.txt}{3}{subsection.4.12}%
+\contentsline {subsection}{\numberline {4.13}drehfreudig13.txt}{3}{subsection.4.13}%
+\contentsline {subsection}{\numberline {4.14}drehfreudig14.txt}{3}{subsection.4.14}%
+\contentsline {subsection}{\numberline {4.15}drehfreudig15.txt}{3}{subsection.4.15}%
+\contentsline {section}{\numberline {5}Quellcode (Auszug)}{3}{section.5}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

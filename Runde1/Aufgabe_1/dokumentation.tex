@@ -1,0 +1,210 @@
+\documentclass[a4paper,10pt,ngerman]{scrartcl}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,margin=2.5cm,footskip=0.5cm]{geometry}
+
+% Die nächsten vier Felder bitte anpassen:
+\newcommand{\Aufgabe}{Aufgabe 1: Drehfreudig} % Aufgabennummer und Aufgabennamen angeben
+\newcommand{\TeamId}{00572}                       % Team-ID aus dem PMS angeben
+\newcommand{\TeamName}{Ralli}                 % Team-Namen angeben
+\newcommand{\Namen}{David Adam}           % Namen der Bearbeiter/-innen dieser Aufgabe angeben
+ 
+% Kopf- und Fußzeilen
+\usepackage{scrlayer-scrpage, lastpage}
+\setkomafont{pageheadfoot}{\large\textrm}
+\lohead{\Aufgabe}
+\rohead{Team-ID: \TeamId}
+\cfoot*{\thepage{}/\pageref{LastPage}}
+
+% Position des Titels
+\usepackage{titling}
+\setlength{\droptitle}{-1.0cm}
+
+% Für mathematische Befehle und Symbole
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Für Bilder
+\usepackage{graphicx}
+
+% Für Algorithmen
+\usepackage{algpseudocode}
+
+% Für Quelltext
+\usepackage{listings}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+  keywordstyle=\color{blue},commentstyle=\color{mygreen},
+  stringstyle=\color{mymauve},rulecolor=\color{black},
+  basicstyle=\footnotesize\ttfamily,numberstyle=\tiny\color{mygray},
+  captionpos=b, % sets the caption-position to bottom
+  keepspaces=true, % keeps spaces in text
+  numbers=left, numbersep=5pt, showspaces=false,showstringspaces=true,
+  showtabs=false, stepnumber=2, tabsize=2, title=\lstname
+}
+
+% Diese beiden Pakete müssen zuletzt geladen werden
+\usepackage{hyperref} % Anklickbare Links im Dokument
+\usepackage{cleveref}
+
+% Daten für die Titelseite
+\title{\textbf{\Huge\Aufgabe}}
+\author{\LARGE Team-ID: \LARGE \TeamId \\\\
+	    \LARGE Team-Name: \LARGE \TeamName \\\\
+	    \LARGE Bearbeiter/-innen dieser Aufgabe: \\ 
+	    \LARGE \Namen\\\\}
+\date{\LARGE 20. Oktober 2025}
+
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\vspace{0.5cm}
+
+\section{Lösungsidee}
+
+Die Kernidee meiner Lösung basiert darauf, dass ein Baum genau dann drehfreudig ist, wenn die Blattrechtecke unter 180°-Drehung auf sich selbst abgebildet werden. Jeder Knoten im Baum bekommt ein horizontales Intervall zugewiesen, das seinen Platzbereich im Gesamtrechteck definiert.
+
+Ich starte bei der Wurzel mit dem Intervall [0, 1] und teile dieses gleichmäßig auf alle Kindknoten auf. Wenn ein Knoten zum Beispiel 3 Kinder hat, bekommt jedes Kind genau ein Drittel der Breite des Elternintervalls. Diese Aufteilung mache ich rekursiv für den ganzen Baum durch, bis ich bei den Blättern ankomme.
+
+Die Drehfreudigkeit überprüfe ich dann so: Ich schaue mir alle Blattintervalle an und drehe sie gedanklich um 180° im Einheitsrechteck. Das heißt, ein Intervall [s, s+w) wird zu [1-(s+w), 1-s). Wenn die Menge aller gedrehten Intervalle exakt mit der ursprünglichen Menge übereinstimmt, ist der Baum drehfreudig.
+
+Für die Visualisierung generiere ich eine SVG-Grafik, die den Baum zweimal zeigt: einmal normal und einmal um 180° gedreht. Dadurch kann man direkt sehen, ob die Blätter wieder übereinander liegen.
+
+\section{Umsetzung}
+
+Die Umsetzung folgt der beschriebenen Idee. Zuerst verarbeite ich die Klammer-Eingabe und erzeuge mit einem Stack die Kindliste \texttt{children}. Anschließend weist \texttt{compute\_intervals} per Tiefensuche jedem Knoten ein exaktes Intervall zu (mit \texttt{Fraction}, um Rundungsfehler zu vermeiden), indem die aktuelle Breite gleichmäßig auf die Kinder verteilt wird. Die Drehfreudigkeit prüfe ich, indem ich alle Blattintervalle zu \texttt{(1-(s+w), w)} spiegele und die sortierten Listen vergleiche. Falls die Bedingung erfüllt ist, erstellt \texttt{generate\_svg} eine Bild: oben der Originalbaum, unten die 180° gedrehte Variante, getrennt durch eine Mittellinie.
+
+\section{Werkzeuge}
+
+Für diese Aufgabe habe ich folgende Werkzeuge verwendet:
+
+\textbf{fractions.Fraction:} Diese Python-Bibliothek nutze ich für exakte Bruchrechnung. Damit vermeide ich Rundungsfehler beim Vergleich der Intervalle. Die Intervallbreiten sind oft Brüche wie 1/3 oder 1/4, und mit Fraction bleiben diese Werte exakt.
+
+\textbf{ChatGPT-5:} Ich habe ChatGPT genutzt, um mir erklären zu lassen, wie man SVG-Grafiken erstellt. Besonders die Syntax für Linien, Kreise und das viewBox-Attribut waren für mich neu. ChatGPT hat mir Beispielcode gezeigt, den ich dann an meine Bedürfnisse angepasst habe.
+
+\textbf{VS Code mit Inline-Vervollständigung:} Beim Schreiben des Codes hat mir die Inline-Vervollständigung von VS Code (GitHub Copilot) geholfen, vor allem bei sich wiederholenden Konstrukten wie den SVG-Tags und bei der Formatierung der Ausgabe. Die Vorschläge waren meistens sinnvoll und haben mir Zeit gespart.
+
+\textbf{Vorgehensweise:} Zuerst habe ich mir die Aufgabenstellung genau durchgelesen und ein paar Beispiele auf Papier durchgerechnet, um die Idee mit den Intervallen zu verstehen. Dann habe ich angefangen, das Parsen zu programmieren und mit kleinen Testbäumen überprüft. Als das funktionierte, kam die Intervallberechnung dran. Die SVG-Generierung war der letzte Schritt, weil ich dafür erst recherchieren musste, wie SVG überhaupt funktioniert.
+
+\section{Beispiele}
+
+\subsection{drehfreudig01.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig02.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig03.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig04.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig05.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig06.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig07.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig08.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig09.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig10.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig11.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig12.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig13.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig14.txt}
+\begin{verbatim}
+Der Baum ist nicht drehfreudig.
+\end{verbatim}
+
+\subsection{drehfreudig15.txt}
+\begin{verbatim}
+Der Baum ist drehfreudig.
+\end{verbatim}
+
+\section{Quellcode (Auszug)}
+\begin{lstlisting}[language=Python, caption=]
+def compute_intervals(root, children):
+    """Berechnet fuer jeden Knoten sein horizontales Intervall."""
+    intervals = {}
+    max_depth = 0
+
+    def dfs(u, start, width, depth):
+        nonlocal max_depth
+        intervals[u] = (start, width, depth)
+        max_depth = max(max_depth, depth)
+        k = len(children[u])
+        if k:
+            child_width = width / k
+            x = start
+            for v in children[u]:
+                dfs(v, x, child_width, depth + 1)
+                x += child_width
+
+    dfs(root, Fraction(0, 1), Fraction(1, 1), 0)
+    return intervals, max_depth
+
+
+def is_drehfreudig(children, intervals) -> bool:
+    """Prueft ob die Blatt-Rechtecke unter 180-Drehung 
+       zusammenpassen."""
+    leaves = [u for u in range(len(children)) 
+              if not children[u]]
+    segs = sorted((intervals[u][0], intervals[u][1]) 
+                  for u in leaves)
+    mirrored = sorted(
+        (Fraction(1, 1) - (s + w), w)
+        for (s, w) in segs
+    )
+    return segs == mirrored
+\end{lstlisting}
+
+\end{document}

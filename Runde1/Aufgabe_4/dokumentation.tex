@@ -1,0 +1,279 @@
+\documentclass[a4paper,10pt,ngerman]{scrartcl}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,margin=2.5cm,footskip=0.5cm]{geometry}
+
+% Die nächsten vier Felder bitte anpassen:
+\newcommand{\Aufgabe}{Aufgabe 4: Tomograph} % Aufgabennummer und Aufgabennamen angeben
+\newcommand{\TeamId}{00572}                       % Team-ID aus dem PMS angeben
+\newcommand{\TeamName}{Ralli}                 % Team-Namen angeben
+\newcommand{\Namen}{David Adam}           % Namen der Bearbeiter/-innen dieser Aufgabe angeben
+ 
+% Kopf- und Fußzeilen
+\usepackage{scrlayer-scrpage, lastpage}
+\setkomafont{pageheadfoot}{\large\textrm}
+\lohead{\Aufgabe}
+\rohead{Team-ID: \TeamId}
+\cfoot*{\thepage{}/\pageref{LastPage}}
+
+% Position des Titels
+\usepackage{titling}
+\setlength{\droptitle}{-1.0cm}
+
+% Für mathematische Befehle und Symbole
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Für Bilder
+\usepackage{graphicx}
+
+% Für Algorithmen
+\usepackage{algpseudocode}
+
+% Für Quelltext
+\usepackage{listings}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+  keywordstyle=\color{blue},commentstyle=\color{mygreen},
+  stringstyle=\color{mymauve},rulecolor=\color{black},
+  basicstyle=\footnotesize\ttfamily,numberstyle=\tiny\color{mygray},
+  captionpos=b, % sets the caption-position to bottom
+  keepspaces=true, % keeps spaces in text
+  numbers=left, numbersep=5pt, showspaces=false,showstringspaces=true,
+  showtabs=false, stepnumber=2, tabsize=2, title=\lstname
+}
+
+% Diese beiden Pakete müssen zuletzt geladen werden
+\usepackage{hyperref} % Anklickbare Links im Dokument
+\usepackage{cleveref}
+
+% Daten für die Titelseite
+\title{\textbf{\Huge\Aufgabe}}
+\author{\LARGE Team-ID: \LARGE \TeamId \\\\
+	    \LARGE Team-Name: \LARGE \TeamName \\\\
+	    \LARGE Bearbeiter/-innen dieser Aufgabe: \\ 
+	    \LARGE \Namen\\\\}
+\date{\LARGE 11. November 2025}
+
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\vspace{0.5cm}
+
+\section{Lösungsidee}
+
+Wir haben ein $n \times n$-Gitter mit Variablen $x_{ij} \in \{0,1\}$ (1 steht für "X", 0 für "."). Gegeben sind Summen für
+Zeilen $(r_i)$, Spalten $(c_j)$ und zwei Diagonalrichtungen $(d^\nearrow_k)$ und $(d^\searrow_k)$.
+
+Formal:
+\begin{align*}
+\sum_{j=0}^{n-1} x_{ij} &= r_i \quad \text{für alle } i,\\
+\sum_{i=0}^{n-1} x_{ij} &= c_j \quad \text{für alle } j,\\
+\sum_{(i,j)\in D^\nearrow_k} x_{ij} &= d^\nearrow_k \quad (k=0,\dots,2n-2),\\
+\sum_{(i,j)\in D^\searrow_k} x_{ij} &= d^\searrow_k \quad (k=0,\dots,2n-2),
+\end{align*}
+wobei die Diagonalindizes über
+\[ D^\nearrow_k = \{(i,j)\mid i-j = k-(n-1)\}, \qquad D^\searrow_k = \{(i,j)\mid i+j=k\} \]
+definiert sind. Eine Belegung ist zulässig, wenn alle vier Summenfamilien stimmen.
+
+Idee: Backtracking mit harter Früherkennung von Unmöglichkeit. Für jede Zeile/Spalte/Diagonale tracke ich
+"wie viele Einsen noch übrig sind" (left) und "wie viele Felder dort noch frei sind" (free). Ein Zustand ist sofort
+unmöglich, wenn für irgendeine Nebenbedingung gilt: left < 0 oder left > free. So schneide ich viele Pfade früh ab.
+
+Ziel laut Aufgabenstellung ist auch, Eindeutigkeiten zu erkennen ("?" bei Mehrdeutigkeit). Dafür müsste man mehrere Lösungen
+einsammeln. In meiner Abgabe konzentriere ich mich wegen Laufzeit erst auf das Finden einer gültigen Figur; Mehrdeutigkeit
+kann optional erkannt werden, wenn mehrere Lösungen innerhalb eines Schrittlimits gefunden werden.
+
+\section{Umsetzung}
+
+Die Summenbedingungen halte ich explizit nach, damit die Suche gezielt bleibt. Über \texttt{diag1\_index} und \texttt{diag2\_index} ordne ich jedes Feld den passenden Diagonalen zu; in \texttt{rows/cols/d1/d2\_left} und \texttt{rows/cols/d1/d2\_free} stehen jeweils die noch zu setzenden Einsen und die freien Felder. Vor jedem Schritt prüft \texttt{check\_bounds}, dass \texttt{0 <= left <= free} überall eingehalten ist. \texttt{propagate} setzt erzwungene Werte (bei \texttt{left==0} nur 0, bei \texttt{left==free} nur 1). Die nächste Zelle wähle ich mit einer MRV-ähnlichen Heuristik und teste 1 bzw. 0; Änderungen protokolliere ich in \texttt{log} und mache sie bei Bedarf mit \texttt{undo} rückgängig. Ein \texttt{step\_limit} begrenzt die Laufzeit, und nach der ersten gültigen Figur beende ich mit \texttt{found\_one}. Optional sammelt \texttt{possibilities} beobachtete Werte pro Feld; wenn innerhalb des Limits mehrere Lösungen auftreten, entstehen damit auch "?"-Felder.
+
+\section{Werkzeuge}
+
+	extbf{Python 3:} Als Programmiersprache, weil Backtracking in Python einfach zu implementieren ist und die Sprache gut lesbar ist.
+
+\textbf{VS Code mit Inline-Vervollständigung:} Die automatische Vervollständigung hat mir beim Schreiben der vielen ähnlichen Array-Zugriffe geholfen (z.B. \texttt{rows\_left}, \texttt{cols\_left}, usw.).
+
+\textbf{Backtracking-Muster:} Ich habe mir verschiedene Backtracking-Implementierungen angeschaut, zum Beispiel für Sudoku-Solver und das N-Damen-Problem. Die Grundstruktur (rekursive Funktion, die sich selbst aufruft und Zustand zurücksetzt) habe ich daraus übernommen.
+
+\textbf{Eigene Ideen:} Die konkrete Anwendung auf das Tomograph-Problem mit den vier verschiedenen Summenarten und das Tracking der Mehrdeutigkeiten sind meine eigenen Ideen. Besonders die Heuristik für die Feldauswahl habe ich selbst entwickelt, nachdem ich gemerkt habe, dass das naive Durchgehen von links nach rechts zu langsam ist.
+
+\textbf{Constraint-Propagation:} Die Idee, ständig zu prüfen, ob die Constraints noch erfüllbar sind, kommt aus dem Bereich der Constraint-Satisfaction-Probleme (CSP). Ich habe mir ein paar CSP-Beispiele angeschaut und die Idee dann auf mein Problem übertragen.
+
+\textbf{Vorgehensweise:} Zuerst habe ich die Aufgabe analysiert und mir klar gemacht, dass es ein kombinatorisches Suchproblem ist. Dann habe ich eine naive Backtracking-Version geschrieben, die sehr langsam war. Danach habe ich die Constraint-Checks eingebaut und die Heuristik für die Feldauswahl hinzugefügt. Zum Schluss kam das Possibilities-Tracking für die Mehrdeutigkeitserkennung dazu.
+
+\section{Beispiele}
+
+\subsection{tomograph00.txt}
+\begin{verbatim}
+. . XXX. . . 
+. . X. X. . . 
+. . XXX. . .
+X. . X. . . .
+. XXXXXX.
+. . . X. . X.
+. . . X. . . X
+. . X. X. . .
+\end{verbatim}
+
+\subsection{tomograph01.txt}
+\begin{verbatim}
+. . 
+X. 
+\end{verbatim}
+
+\subsection{tomograph02.txt}
+\begin{verbatim}
+. . X. 
+XX. . 
+XXXX
+X. . X
+\end{verbatim}
+
+\subsection{tomograph03.txt}
+\begin{verbatim}
+. ??X
+?XX?
+?. . ?
+. ??X
+\end{verbatim}
+
+\subsection{tomograph04.txt}
+\begin{verbatim}
+. ???. 
+?????
+??X??
+?????
+. ???.
+\end{verbatim}
+
+\subsection{tomograph05.txt}
+\begin{verbatim}
+. ????. 
+??X???
+?XXX??
+??XX??
+?????.
+. ???. X
+\end{verbatim}
+
+\subsection{tomograph06.txt}
+\begin{verbatim}
+. . XX. X. . . 
+X. ?. XX. ?X
+X?XXXXXX?
+X. . X?. X?X
+X. . ?XXXX?
+X. . XX. . . .
+XXX. XXXX.
+X?X?. . . XX
+. X?X?. XXX
+\end{verbatim}
+
+\subsection{tomograph07.txt}
+\begin{verbatim}
+. . XX. . X. XX
+XXXXXX. . X. 
+. X. X. . . . . X
+XXXX. X. . . X
+. X. XX. . XX.
+X. X. . XX. XX
+X. . X. . XX. X
+X. XX. . . . XX
+. . XX. . . X. .
+. XX. . . . . X.
+\end{verbatim}
+
+\subsection{tomograph08.txt}
+\begin{verbatim}
+. XX. . X. X. XX
+. . . XXX. X. XX
+X. XXXXXXXXX
+. . XXXX. X. XX
+. . . X. . . X. . X
+. X. XX. . . . XX
+. XXX. X. X. XX
+. . . . . . . . . . .
+. . XX. . . X. XX
+. X. XXX. X. XX
+. . . XXX. X. XX
+\end{verbatim}
+\subsection{tomograph09.txt}
+\begin{verbatim}
+. ????. 
+??X???
+?XXX??
+??XX??
+?????.
+. ???. X
+\end{verbatim}
+
+\subsection{tomograph10.txt}
+\begin{verbatim}
+XXXXXX......
+.XXXXX....XX
+...X....XXXX
+...XX.XXXX.X
+......X.XXXX
+.XXXXX.X..X.
+XXX.X..X....
+XXX.X.X..XX.
+XX...XXX....
+X.X..XXXXX..
+X.......XXXX
+...X.XXXX..X
+\end{verbatim}
+
+\section{Quellcode (Auszug)}
+
+\begin{lstlisting}[language=Python]
+def backtrack():
+    nonlocal solutions, example_solution, found_one, steps
+    if found_one:
+        return
+    steps += 1
+    if steps > step_limit:
+        return
+    if not check_bounds():
+        return
+
+    base = len(log)
+    if not propagate(log):
+        undo(log, base)
+        return
+
+    if is_complete():
+        if (all(x == 0 for x in rows_left) and
+            all(x == 0 for x in cols_left) and
+            all(x == 0 for x in d1_left) and
+            all(x == 0 for x in d2_left)):
+            solutions += 1
+            for i in range(n):
+                for j in range(n):
+                    v = grid[i][j]
+                    possibilities[i][j] |= 0b10 if v == 1 else 0b01
+            if example_solution is None:
+                example_solution = [row[:] for row in grid]
+            found_one = True
+    else:
+        (i, j), dom = choose_cell()
+        if dom == 0:
+            undo(log, base)
+            return
+        a0, a1 = allow_vals(i, j)
+        for val in ([1] if a1 else []) + ([0] if a0 else []):
+            if set_cell(i, j, val, log):
+                backtrack()
+                undo(log, len(log) - 1)
+
+    undo(log, base)
+\end{lstlisting}
+
+\end{document}

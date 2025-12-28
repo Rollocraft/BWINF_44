@@ -1,0 +1,200 @@
+\documentclass[a4paper,10pt,ngerman]{scrartcl}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,margin=2.5cm,footskip=0.5cm]{geometry}
+
+% Die nächsten vier Felder bitte anpassen:
+\newcommand{\Aufgabe}{Aufgabe 3: Hund mit Leine} % Aufgabennummer und Aufgabennamen angeben
+\newcommand{\TeamId}{00572}                       % Team-ID aus dem PMS angeben
+\newcommand{\TeamName}{Ralli}                 % Team-Namen angeben
+\newcommand{\Namen}{David Adam}           % Namen der Bearbeiter/-innen dieser Aufgabe angeben
+ 
+% Kopf- und Fußzeilen
+\usepackage{scrlayer-scrpage, lastpage}
+\setkomafont{pageheadfoot}{\large\textrm}
+\lohead{\Aufgabe}
+\rohead{Team-ID: \TeamId}
+\cfoot*{\thepage{}/\pageref{LastPage}}
+
+% Position des Titels
+\usepackage{titling}
+\setlength{\droptitle}{-1.0cm}
+
+% Für mathematische Befehle und Symbole
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Für Bilder
+\usepackage{graphicx}
+
+% Für Algorithmen
+\usepackage{algpseudocode}
+
+% Für Quelltext
+\usepackage{listings}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+  keywordstyle=\color{blue},commentstyle=\color{mygreen},
+  stringstyle=\color{mymauve},rulecolor=\color{black},
+  basicstyle=\footnotesize\ttfamily,numberstyle=\tiny\color{mygray},
+  captionpos=b, % sets the caption-position to bottom
+  keepspaces=true, % keeps spaces in text
+  numbers=left, numbersep=5pt, showspaces=false,showstringspaces=true,
+  showtabs=false, stepnumber=2, tabsize=2, title=\lstname
+}
+
+% Diese beiden Pakete müssen zuletzt geladen werden
+\usepackage{hyperref} % Anklickbare Links im Dokument
+\usepackage{cleveref}
+
+% Daten für die Titelseite
+\title{\textbf{\Huge\Aufgabe}}
+\author{\LARGE Team-ID: \LARGE \TeamId \\\\
+	    \LARGE Team-Name: \LARGE \TeamName \\\\
+	    \LARGE Bearbeiter/-innen dieser Aufgabe: \\ 
+	    \LARGE \Namen\\\\}
+\date{\LARGE 06. November 2025}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\vspace{0.5cm}
+
+\section{Lösungsidee}
+
+Die Aufgabe besteht darin, die maximale Länge einer Hundeleine zu berechnen, sodass die Leine bei einem bestimmten Spazierweg nicht durch einen See geht.
+
+Meine Lösungsidee basiert auf der Erkenntnis, dass die Leine ein Segment zwischen zwei Punkten des Spazierwegs ist. Die Leine darf weder einen See schneiden noch durch einen See gehen. Die maximale erlaubte Länge ist also der minimale Abstand zwischen irgendeinem Wegsegment und irgendeiner Seekante.
+
+Ich betrachte jedes Segment des Spazierwegs und jeden See einzeln. Für jede Kombination prüfe ich:
+\begin{itemize}
+\item Liegt ein Endpunkt des Wegsegments im See? → Leinenlänge ist 0
+\item Schneidet das Wegsegment eine Kante des Sees? → Leinenlänge ist 0
+\item Sonst: Berechne den minimalen Abstand zwischen dem Wegsegment und allen Kanten des Sees
+\end{itemize}
+
+Das globale Minimum über alle diese Abstände ist die maximale Leinenlänge.
+
+\section{Umsetzung}
+
+Zuerst implementiere ich grundlegende Geometrie-Helfer. Mit \texttt{dot}, \texttt{cross}, \texttt{sub} und \texttt{dist} lassen sich die nötigen Vektoroperationen berechnen. Darauf aufbauend prüfen \texttt{orientation}, \texttt{on\_segment} und \texttt{segments\_intersect}, ob sich Segmente schneiden. Die Abstände bestimme ich mit \texttt{dist\_point\_segment} und daraus \texttt{segment\_segment\_distance}. Für Punkt-in-Polygon verwende ich Ray-Casting in \texttt{point\_in\_polygon}; Punkte auf Kanten zählen als innen. In \texttt{compute\_max\_leash\_length} behandle ich zunächst die harten Fälle (Endpunkt im See oder Schnitt → Ergebnis 0), ansonsten nehme ich das Minimum aller Segment–Kanten-Abstände. Das \texttt{main} liest die Eingabe und gibt die Länge mit sechs Nachkommastellen aus (bzw. \texttt{inf}, wenn es keine Seen gibt).
+
+\section{Werkzeuge}
+
+\textbf{math-Bibliothek:} Für die Distanzberechnung nutze ich \texttt{math.hypot}, was numerisch stabiler ist als \texttt{sqrt(dx**2 + dy**2)}.
+
+\textbf{Geometrie-Algorithmen:} Ich habe mir verschiedene Online-Ressourcen zu geometrischen Algorithmen angeschaut, besonders zu Segment-Schnitt-Tests und dem Ray-Casting-Algorithmus. Die Grundideen stammen aus verschiedenen Quellen, aber die konkrete Implementierung habe ich selbst geschrieben.
+
+\textbf{VS Code mit Inline-Vervollständigung:} Die Codevervollständigung hat mir beim Schreiben der vielen ähnlichen geometrischen Funktionen geholfen, besonders bei den Koordinatenzugriffen (\texttt{a[0]}, \texttt{a[1]}).
+
+\textbf{Epsilon-Vergleiche:} Um numerische Ungenauigkeiten bei Fließkommazahlen zu behandeln, verwende ich eine kleine Konstante \texttt{EPS = 1e-9}. Statt \texttt{x == 0} prüfe ich \texttt{abs(x) < EPS}. Diese Technik habe ich aus verschiedenen Geometrie-Algorithmus-Implementierungen übernommen.
+
+\textbf{Vorgehensweise:} Ich habe zuerst auf Papier verschiedene Fälle gezeichnet (Segmente, die Seen schneiden, Segmente parallel zu Seen, etc.). Dann habe ich die grundlegenden geometrischen Funktionen implementiert und mit einfachen Testfällen getestet. Danach kam die Hauptlogik, die alle Fälle kombiniert. Am schwierigsten war es, alle Sonderfälle korrekt zu behandeln, besonders wenn Punkte genau auf Kanten liegen.
+
+\section{Beispiele}
+
+\subsection{hund01.txt}
+\begin{verbatim}
+4.036037
+\end{verbatim}
+
+\subsection{hund02.txt}
+\begin{verbatim}
+4.209878
+\end{verbatim}
+
+\subsection{hund03.txt}
+\begin{verbatim}
+2.236068
+\end{verbatim}
+
+\subsection{hund04.txt}
+\begin{verbatim}
+1.671258
+\end{verbatim}
+
+\subsection{hund05.txt}
+\begin{verbatim}
+50.320350
+\end{verbatim}
+
+\subsection{hund06.txt}
+\begin{verbatim}
+199.572502
+\end{verbatim}
+
+\section{Quellcode (Auszug)}
+
+\begin{lstlisting}[language=Python, caption=Geometrische Kernfunktionen]
+def segments_intersect(a, b, c, d):
+    """Prueft ob sich zwei Segmente schneiden"""
+    o1 = orientation(a, b, c)
+    o2 = orientation(a, b, d)
+    o3 = orientation(c, d, a)
+    o4 = orientation(c, d, b)
+    
+    # Kollineare Sonderfaelle
+    if abs(o1) < EPS and on_segment(a, b, c): return True
+    if abs(o2) < EPS and on_segment(a, b, d): return True
+    if abs(o3) < EPS and on_segment(c, d, a): return True
+    if abs(o4) < EPS and on_segment(c, d, b): return True
+    
+    # Allgemeiner Fall
+    return (o1 > 0) != (o2 > 0) and (o3 > 0) != (o4 > 0)
+
+
+def dist_point_segment(p, a, b):
+    ab = sub(b, a)
+    ap = sub(p, a)
+    ab2 = dot(ab, ab)
+    if ab2 < EPS:
+        # a und b sind fast gleich
+        return dist(p, a)
+    t = dot(ap, ab) / ab2
+    if t < 0:
+        return dist(p, a)
+    elif t > 1:
+        return dist(p, b)
+    proj = (a[0] + t * ab[0], a[1] + t * ab[1])
+    return dist(p, proj)
+
+
+def compute_max_leash_length(segments, lakes):
+    if not lakes:
+        return float("inf")
+
+    best = float("inf")
+
+    for a, b in segments:
+        for poly in lakes:
+            n = len(poly)
+
+            # Endpunkte im See?
+            if point_in_polygon(a, poly) or point_in_polygon(b, poly):
+                return 0.0
+
+            for i in range(n):
+                c = poly[i]
+                d = poly[(i + 1) % n]
+
+                # Schnitt mit einer Polygonkante?
+                if segments_intersect(a, b, c, d):
+                    return 0.0
+
+                d_seg = segment_segment_distance(a, b, c, d)
+                if d_seg < best:
+                    best = d_seg
+
+    if best == float("inf"):
+        # sollte praktisch nicht vorkommen, falls es Seen gibt
+        return 0.0
+    return best
+\end{lstlisting}
+
+\end{document}

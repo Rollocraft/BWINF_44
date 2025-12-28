@@ -1,0 +1,18 @@
+\babel@toc {ngerman}{}\relax 
+\contentsline {section}{\numberline {1}Lösungsidee}{1}{section.1}%
+\contentsline {section}{\numberline {2}Umsetzung}{2}{section.2}%
+\contentsline {section}{\numberline {3}Werkzeuge}{2}{section.3}%
+\contentsline {section}{\numberline {4}Beispiele}{2}{section.4}%
+\contentsline {subsection}{\numberline {4.1}tomograph00.txt}{2}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}tomograph01.txt}{3}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}tomograph02.txt}{3}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}tomograph03.txt}{3}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}tomograph04.txt}{3}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}tomograph05.txt}{3}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}tomograph06.txt}{3}{subsection.4.7}%
+\contentsline {subsection}{\numberline {4.8}tomograph07.txt}{3}{subsection.4.8}%
+\contentsline {subsection}{\numberline {4.9}tomograph08.txt}{4}{subsection.4.9}%
+\contentsline {subsection}{\numberline {4.10}tomograph09.txt}{4}{subsection.4.10}%
+\contentsline {subsection}{\numberline {4.11}tomograph10.txt}{4}{subsection.4.11}%
+\contentsline {section}{\numberline {5}Quellcode (Auszug)}{4}{section.5}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
